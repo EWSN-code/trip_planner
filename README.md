@@ -1,7 +1,13 @@
-# Travel Planner v2 Phase 1.1
+# Travel Planner v2 Phase 2 Overlay
 
-HTTPサーバー経由で `index.html` を開いてください。
+Phase 1.1へSupabase認証・非公開同期を追加する差分パッケージです。
 
-実装済み: 旅行CRUD、複製、旅程CRUD、費用カテゴリ、支払方法別・科目別サマリー、地図・経路・構内図リンク、予約状態の基礎、JSON入出力、A4圧縮印刷。
-
-個人旅行データは同梱していません。手元の `trip.json` を「読込」してください。
+- メール＋パスワード認証
+- セッション維持
+- JSONB一括保存
+- RLS
+- localStorage即時キャッシュ
+- 700msデバウンス同期
+- 同期状態表示
+- 初回ローカルデータ移行
+- ログアウト前保存
