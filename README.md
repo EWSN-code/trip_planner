@@ -1,13 +1,17 @@
-# Travel Planner v2 Phase 2 Overlay
+# Travel Planner Theme Overlay
 
-Phase 1.1へSupabase認証・非公開同期を追加する差分パッケージです。
+現在の `trip_planner` v2.2.1へテーマ切替を追加する差分です。
 
-- メール＋パスワード認証
-- セッション維持
-- JSONB一括保存
-- RLS
-- localStorage即時キャッシュ
-- 700msデバウンス同期
-- 同期状態表示
-- 初回ローカルデータ移行
-- ログアウト前保存
+## 適用
+1. このZIPの中身をリポジトリ直下へコピー
+2. `python apply_theme.py`
+3. ブラウザをスーパーリロード
+
+## テーマ
+- 端末設定に合わせる
+- Journey Light
+- Night Travel
+- Warm Paper
+- この端末だけに適用
+
+印刷CSSは変更しないため、印刷は白背景のままです。
