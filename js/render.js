@@ -85,5 +85,5 @@ export function renderCompareDay({ day, itemsA, itemsB }) {
       )
       .join("");
   };
-  return `<section class="compare-day"><h3>${day}日目</h3><div class="compare-grid"><div class="compare-col">${list(itemsA, "a")}</div><div class="compare-col">${list(itemsB, "b")}</div></div></section>`;
+  return `<section class="compare-day" data-day="${day}"><h3>${day}日目</h3><div class="compare-side" data-side="a">${list(itemsA, "a")}</div><div class="compare-side" data-side="b" hidden>${list(itemsB, "b")}</div></section>`;
 }

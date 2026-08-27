@@ -325,12 +325,37 @@ function showCompare() {
   $("#detailNav").classList.remove("active");
   $("#compareBackBtn").onclick = () => {
     compareSelection = [];
+    compareMode = false;
+    const tog = $("#compareModeToggle");
+    if (tog) tog.checked = false;
+    $("#compareView").hidden = true;
+    $("#compareView").innerHTML = "";
+    $("#listView").hidden = false;
     list();
   };
-  $("#compareHeader").innerHTML = renderCompareSummary(a, b);
+  const tabsHtml = `<div class="compare-tabs" id="compareTabs" role="tablist">`
+    + `<button type="button" class="compare-tab active" data-side="a" role="tab" aria-selected="true">A: ${esc(a.name || "無題の旅行")}</button>`
+    + `<button type="button" class="compare-tab" data-side="b" role="tab" aria-selected="false">B: ${esc(b.name || "無題の旅行")}</button>`
+    + `</div>`;
+  $("#compareHeader").innerHTML = tabsHtml + renderCompareSummary(a, b);
   $("#compareDays").innerHTML = pairByDay(a, b)
     .map((d) => renderCompareDay(d))
     .join("");
+  const tabs = $("#compareTabs");
+  if (tabs) {
+    tabs.querySelectorAll(".compare-tab").forEach((btn) => {
+      btn.onclick = () => {
+        const side = btn.getAttribute("data-side");
+        tabs.querySelectorAll(".compare-tab").forEach((b2) => {
+          b2.classList.toggle("active", b2 === btn);
+          b2.setAttribute("aria-selected", b2 === btn ? "true" : "false");
+        });
+        document
+          .querySelectorAll("#compareDays .compare-side")
+          .forEach((el) => el.toggleAttribute("hidden", el.getAttribute("data-side") !== side));
+      };
+    });
+  }
 }
 function currentCloudTheme() {
   return state?.settings?.theme || "system";
