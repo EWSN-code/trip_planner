@@ -9,3 +9,17 @@
 
 /* v2.6 compare UI: tabs and single-side timeline */
 .compare-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 14px}.compare-tab{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer}.compare-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.compare-day>div{margin-top:6px}
+
+/* v2.6 Step 5: compare layout */
+.compare-header{display:grid;gap:12px;margin:10px 0 14px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.compare-col{min-width:0}
+.compare-col h3{margin:0 0 6px;font-size:15px}
+.compare-day{margin-top:14px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:15px}
+.compare-day>h3{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.compare-side{display:grid;gap:8px}
+.compare-side[hidden]{display:none!important}
+.compare-item{padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.compare-item .time{font-size:12px;color:var(--muted)}
+.compare-item .station-line,.compare-item .item-title{font-size:14px}
+@media(max-width:650px){.compare-grid{grid-template-columns:1fr}}
