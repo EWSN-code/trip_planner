@@ -137,7 +137,7 @@ function actualBlock(i) {
     0,
   );
   const diff = actual - planned;
-  return `<div class="actual-summary"><span class="pill">予定 ${yen(planned)}</span>${recorded ? `<span class="pill cost">実績 ${yen(actual)}</span><span class="actual-diff ${diff > 0 ? "positive" : diff < 0 ? "negative" : ""}">差額 ${diff >= 0 ? "+" : ""}${yen(diff)}</span>` : ""}</div><div class="quick-actions"><button class="sub" data-actual="${i.id}">${recorded ? "実績を修正" : "実績を入力"}</button></div>}`;
+  return `<div class="actual-summary"><span class="pill">予定 ${yen(planned)}</span>${recorded ? `<span class="pill cost">実績 ${yen(actual)}</span><span class="actual-diff ${diff > 0 ? "positive" : diff < 0 ? "negative" : ""}">差額 ${diff >= 0 ? "+" : ""}${yen(diff)}</span>` : ""}</div><div class="quick-actions"><button class="sub" data-actual="${i.id}">${recorded ? "実績を修正" : "実績を入力"}</button></div>`;
 }
 function openAddAt(index = -1) {
   pendingInsertIndex = index;
