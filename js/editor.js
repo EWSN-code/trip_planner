@@ -1,1 +1,137 @@
-import{esc}from"./utils.js";const $=s=>document.querySelector(s);let editId=null;const schema={activity:[["time","時刻","text"],["name","名称","text"],["place","場所","text"]],food:[["time","時刻","text"],["name","店舗・食事名","text"],["place","場所","text"]],hotel:[["time","時刻","text"],["name","宿泊先・内容","text"],["place","場所","text"]],station:[["time","時刻","time"],["name","駅・停留所","text"],["kind","発着","kind"],["point","番線・乗り場","text"]],transport:[["departureTime","出発時刻","time"],["arrivalTime","到着時刻","time"],["from","出発地点","text"],["to","到着地点","text"],["line","路線・列車名","text"],["destination","行先","text"],["mode","交通手段","mode"],["seat","座席・号車","text"]],transfer:[["arrivalTime","到着時刻","time"],["departureTime","出発時刻","time"],["arrivalStation","到着側の駅","text"],["departureStation","出発側の駅","text"],["arrivalPoint","到着番線","text"],["departurePoint","出発番線","text"]]};function fields(type,item={}){$("#itemFields").innerHTML=`<div class="field-grid">${schema[type].map(([k,l,t])=>t==="kind"?`<label>${l}<select data-f="${k}"><option>発</option><option>着</option></select></label>`:t==="mode"?`<label>${l}<select data-f="${k}"><option value="train">電車</option><option value="bus">バス</option><option value="walk">徒歩</option><option value="other">その他</option></select></label>`:`<label>${l}<input data-f="${k}" type="${t}" value="${esc(item[k]||"")}"></label>`).join("")}</div>`;for(const e of document.querySelectorAll("[data-f]"))if(item[e.dataset.f]!=null)e.value=item[e.dataset.f]}function expense(e={},defaultCategory="other"){const r=document.createElement("div");r.className="expense-row";r.innerHTML=`<input data-e="name" placeholder="費目" value="${esc(e.name||"")}"><input data-e="unitPrice" type="number" placeholder="単価" value="${e.unitPrice??""}"><input data-e="qty" type="number" min="1" value="${e.qty||1}"><select data-e="category"><option value="transport">交通</option><option value="food">食事</option><option value="activity">観光</option><option value="hotel">宿泊</option><option value="shopping">買い物</option><option value="ticket">チケット</option><option value="other">その他</option></select><select data-e="payment"><option value="cash">現金</option><option value="ic">IC</option><option value="prepaid">事前支払</option><option value="card">カード</option><option value="other">その他</option></select><button type="button" class="danger">×</button>`;r.querySelector('[data-e="category"]').value=e.category||defaultCategory;r.querySelector('[data-e="payment"]').value=e.payment||"cash";r.querySelector("button").onclick=()=>r.remove();$("#expenseRows").append(r)}export function init(save){$("#itemType").onchange=()=>fields($("#itemType").value);$("#addExpenseBtn").onclick=()=>expense({},({transport:"transport",food:"food",hotel:"hotel",activity:"activity"}[$("#itemType").value]||"other"));$("#itemForm").onsubmit=e=>{e.preventDefault();const type=$("#itemType").value,item={type,day:Number($("#itemDay").value||1),notes:$("#itemNotes").value.split("\n").map(x=>x.trim()).filter(Boolean),expenses:[]};for(const x of document.querySelectorAll("[data-f]"))item[x.dataset.f]=x.value;if(type==="station"){item.tags=[{type:"default",text:item.kind}];delete item.kind}if(type==="transport"){item.tags=item.seat?[{type:"seat",text:item.seat}]:[];delete item.seat}for(const r of $("#expenseRows").children){const g=k=>r.querySelector(`[data-e="${k}"]`).value,u=Number(g("unitPrice")||0),q=Number(g("qty")||1);item.expenses.push({name:g("name"),unitPrice:u,qty:q,total:u*q,category:g("category"),payment:g("payment")})}const q=$("#mapQuery").value.trim();if(q)item.location={query:q};item.stationMapUrl=$("#stationMapUrl").value.trim();if($("#reservationRequired").checked)item.reservation={required:true,openAt:$("#reservationOpenAt").value,status:$("#reservationStatus").value,url:$("#reservationUrl").value.trim()};save(editId,item);$("#itemDialog").close()}}export function open(item=null,day=1,defaultType="activity"){editId=item?.id||null;$("#itemDialogTitle").textContent=item?"旅程を編集":"旅程を追加";$("#itemDay").value=item?.day||day;$("#itemType").value=item?.type||defaultType;$("#itemNotes").value=(item?.notes||[]).join("\n");$("#mapQuery").value=item?.location?.query||"";$("#stationMapUrl").value=item?.stationMapUrl||"";$("#reservationRequired").checked=!!item?.reservation?.required;$("#reservationOpenAt").value=item?.reservation?.openAt||"";$("#reservationStatus").value=item?.reservation?.status||"not_open";$("#reservationUrl").value=item?.reservation?.url||"";$("#expenseRows").innerHTML="";(item?.expenses||[]).forEach(expense);fields($("#itemType").value,item||{});$("#itemDialog").showModal()}
+import { esc } from "./utils.js";
+const $ = (s) => document.querySelector(s);
+let editId = null;
+const schema = {
+  activity: [
+    ["time", "時刻", "text"],
+    ["name", "名称", "text"],
+    ["place", "場所", "text"],
+  ],
+  food: [
+    ["time", "時刻", "text"],
+    ["name", "店舗・食事名", "text"],
+    ["place", "場所", "text"],
+  ],
+  hotel: [
+    ["time", "時刻", "text"],
+    ["name", "宿泊先・内容", "text"],
+    ["place", "場所", "text"],
+  ],
+  station: [
+    ["time", "時刻", "time"],
+    ["name", "駅・停留所", "text"],
+    ["kind", "発着", "kind"],
+    ["point", "番線・乗り場", "text"],
+  ],
+  transport: [
+    ["departureTime", "出発時刻", "time"],
+    ["arrivalTime", "到着時刻", "time"],
+    ["from", "出発地点", "text"],
+    ["to", "到着地点", "text"],
+    ["line", "路線・列車名", "text"],
+    ["destination", "行先", "text"],
+    ["mode", "交通手段", "mode"],
+    ["seat", "座席・号車", "text"],
+  ],
+  transfer: [
+    ["arrivalTime", "到着時刻", "time"],
+    ["departureTime", "出発時刻", "time"],
+    ["arrivalStation", "到着側の駅", "text"],
+    ["departureStation", "出発側の駅", "text"],
+    ["arrivalPoint", "到着番線", "text"],
+    ["departurePoint", "出発番線", "text"],
+  ],
+};
+function fields(type, item = {}) {
+  $("#itemFields").innerHTML =
+    `<div class="field-grid">${schema[type].map(([k, l, t]) => (t === "kind" ? `<label>${l}<select data-f="${k}"><option>発</option><option>着</option></select></label>` : t === "mode" ? `<label>${l}<select data-f="${k}"><option value="train">電車</option><option value="bus">バス</option><option value="walk">徒歩</option><option value="other">その他</option></select></label>` : `<label>${l}<input data-f="${k}" type="${t}" value="${esc(item[k] || "")}"></label>`)).join("")}</div>`;
+  for (const e of document.querySelectorAll("[data-f]"))
+    if (item[e.dataset.f] != null) e.value = item[e.dataset.f];
+}
+function expense(e = {}, defaultCategory = "other") {
+  const r = document.createElement("div");
+  r.className = "expense-row";
+  r.innerHTML = `<input data-e="name" placeholder="費目" value="${esc(e.name || "")}"><input data-e="unitPrice" type="number" placeholder="単価" value="${e.unitPrice ?? ""}"><input data-e="qty" type="number" min="1" value="${e.qty || 1}"><select data-e="category"><option value="transport">交通</option><option value="food">食事</option><option value="activity">観光</option><option value="hotel">宿泊</option><option value="shopping">買い物</option><option value="ticket">チケット</option><option value="other">その他</option></select><select data-e="payment"><option value="cash">現金</option><option value="ic">IC</option><option value="prepaid">事前支払</option><option value="card">カード</option><option value="other">その他</option></select><button type="button" class="danger">×</button>`;
+  r.querySelector('[data-e="category"]').value = e.category || defaultCategory;
+  r.querySelector('[data-e="payment"]').value = e.payment || "cash";
+  r.querySelector("button").onclick = () => r.remove();
+  $("#expenseRows").append(r);
+}
+export function init(save) {
+  $("#itemType").onchange = () => fields($("#itemType").value);
+  $("#addExpenseBtn").onclick = () =>
+    expense(
+      {},
+      {
+        transport: "transport",
+        food: "food",
+        hotel: "hotel",
+        activity: "activity",
+      }[$("#itemType").value] || "other",
+    );
+  $("#itemForm").onsubmit = (e) => {
+    e.preventDefault();
+    const type = $("#itemType").value,
+      item = {
+        type,
+        day: Number($("#itemDay").value || 1),
+        notes: $("#itemNotes")
+          .value.split("\n")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        expenses: [],
+      };
+    for (const x of document.querySelectorAll("[data-f]"))
+      item[x.dataset.f] = x.value;
+    if (type === "station") {
+      item.tags = [{ type: "default", text: item.kind }];
+      delete item.kind;
+    }
+    if (type === "transport") {
+      item.tags = item.seat ? [{ type: "seat", text: item.seat }] : [];
+      delete item.seat;
+    }
+    for (const r of $("#expenseRows").children) {
+      const g = (k) => r.querySelector(`[data-e="${k}"]`).value,
+        u = Number(g("unitPrice") || 0),
+        q = Number(g("qty") || 1);
+      item.expenses.push({
+        name: g("name"),
+        unitPrice: u,
+        qty: q,
+        total: u * q,
+        category: g("category"),
+        payment: g("payment"),
+      });
+    }
+    const q = $("#mapQuery").value.trim();
+    if (q) item.location = { query: q };
+    item.stationMapUrl = $("#stationMapUrl").value.trim();
+    if ($("#reservationRequired").checked)
+      item.reservation = {
+        required: true,
+        openAt: $("#reservationOpenAt").value,
+        status: $("#reservationStatus").value,
+        url: $("#reservationUrl").value.trim(),
+      };
+    save(editId, item);
+    $("#itemDialog").close();
+  };
+}
+export function open(item = null, day = 1, defaultType = "activity") {
+  editId = item?.id || null;
+  $("#itemDialogTitle").textContent = item ? "旅程を編集" : "旅程を追加";
+  $("#itemDay").value = item?.day || day;
+  $("#itemType").value = item?.type || defaultType;
+  $("#itemNotes").value = (item?.notes || []).join("\n");
+  $("#mapQuery").value = item?.location?.query || "";
+  $("#stationMapUrl").value = item?.stationMapUrl || "";
+  $("#reservationRequired").checked = !!item?.reservation?.required;
+  $("#reservationOpenAt").value = item?.reservation?.openAt || "";
+  $("#reservationStatus").value = item?.reservation?.status || "not_open";
+  $("#reservationUrl").value = item?.reservation?.url || "";
+  $("#expenseRows").innerHTML = "";
+  (item?.expenses || []).forEach(expense);
+  fields($("#itemType").value, item || {});
+  $("#itemDialog").showModal();
+}

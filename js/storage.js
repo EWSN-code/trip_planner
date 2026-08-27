@@ -1,6 +1,72 @@
-import{fetchCloudState,upsertCloudState}from"./cloud.js";
-const KEY="travel_planner_v2_state";let currentUser=null,statusHandler=()=>{},timer=null,queued=null;
-const read=()=>{const x=localStorage.getItem(KEY);return x?JSON.parse(x):null};const write=s=>localStorage.setItem(KEY,JSON.stringify(s));
-export const setStorageUser=u=>{currentUser=u||null};export const onStorageStatus=h=>{statusHandler=h||(()=>{})};
-async function flush(){if(!currentUser||!queued)return;const s=queued;queued=null;statusHandler("syncing","同期中…");try{await upsertCloudState(currentUser.id,s);statusHandler("synced","同期済み")}catch(e){queued=s;statusHandler("error","同期待ち");console.error(e)}}
-export const Storage={async load(){const local=read();if(!currentUser)return local;statusHandler("syncing","読込中…");try{const remote=await fetchCloudState(currentUser.id);if(remote?.data){write(remote.data);statusHandler("synced","同期済み");return remote.data}if(local?.trips?.length){await upsertCloudState(currentUser.id,local);statusHandler("synced","移行済み");return local}statusHandler("synced","同期済み");return local}catch(e){statusHandler("error","ローカル起動");console.error(e);return local}},async save(s){write(s);if(!currentUser){statusHandler("","ローカル");return}queued=s;statusHandler("syncing","保存待ち…");clearTimeout(timer);timer=setTimeout(flush,700)},async flush(){clearTimeout(timer);await flush()}};
+import { fetchCloudState, upsertCloudState } from "./cloud.js";
+const KEY = "travel_planner_v2_state";
+let currentUser = null,
+  statusHandler = () => {},
+  timer = null,
+  queued = null;
+const read = () => {
+  const x = localStorage.getItem(KEY);
+  return x ? JSON.parse(x) : null;
+};
+const write = (s) => localStorage.setItem(KEY, JSON.stringify(s));
+export const setStorageUser = (u) => {
+  currentUser = u || null;
+};
+export const onStorageStatus = (h) => {
+  statusHandler = h || (() => {});
+};
+async function flush() {
+  if (!currentUser || !queued) return;
+  const s = queued;
+  queued = null;
+  statusHandler("syncing", "同期中…");
+  try {
+    await upsertCloudState(currentUser.id, s);
+    statusHandler("synced", "同期済み");
+  } catch (e) {
+    queued = s;
+    statusHandler("error", "同期待ち");
+    console.error(e);
+  }
+}
+export const Storage = {
+  async load() {
+    const local = read();
+    if (!currentUser) return local;
+    statusHandler("syncing", "読込中…");
+    try {
+      const remote = await fetchCloudState(currentUser.id);
+      if (remote?.data) {
+        write(remote.data);
+        statusHandler("synced", "同期済み");
+        return remote.data;
+      }
+      if (local?.trips?.length) {
+        await upsertCloudState(currentUser.id, local);
+        statusHandler("synced", "移行済み");
+        return local;
+      }
+      statusHandler("synced", "同期済み");
+      return local;
+    } catch (e) {
+      statusHandler("error", "ローカル起動");
+      console.error(e);
+      return local;
+    }
+  },
+  async save(s) {
+    write(s);
+    if (!currentUser) {
+      statusHandler("", "ローカル");
+      return;
+    }
+    queued = s;
+    statusHandler("syncing", "保存待ち…");
+    clearTimeout(timer);
+    timer = setTimeout(flush, 700);
+  },
+  async flush() {
+    clearTimeout(timer);
+    await flush();
+  },
+};
